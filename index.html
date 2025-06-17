@@ -65,9 +65,10 @@
       display: none;
       position: relative;
     }
-    video {
+    video, iframe {
       width: 100%;
       border-radius: 10px;
+      height: 480px;
     }
     .caption-menu {
       position: absolute;
@@ -79,13 +80,6 @@
       border-radius: 6px;
       display: none;
       flex-direction: column;
-    }
-    .caption-menu select {
-      background-color: #333;
-      color: white;
-      border: none;
-      padding: 5px;
-      border-radius: 5px;
     }
     .caption-button {
       position: absolute;
@@ -116,9 +110,10 @@
 <div class="movie-grid" id="movie-grid"></div>
 
 <div id="video-player">
-  <video id="player" controls crossorigin="anonymous">
+  <video id="player" controls crossorigin="anonymous" style="display: none;">
     <source id="videoSource" src="" type="video/mp4">
   </video>
+  <iframe id="iframePlayer" style="display: none;" frameborder="0" allowfullscreen></iframe>
   <button class="caption-button" onclick="toggleCaptionMenu()">⋮</button>
   <div class="caption-menu" id="captionMenu">
     <label for="subtitleSelect">Captions:</label>
@@ -137,7 +132,20 @@
       title: "Toy Story 1",
       videoUrl: "movies mp4/toy_story_1.mp4",
       thumbnail: "https://upload.wikimedia.org/wikipedia/en/1/13/Toy_Story.jpg",
-      subtitle: "subs/toy_story_1_hr.vtt"
+      subtitle: "subs/toy_story_1_hr.vtt",
+      embed: false
+    },
+    {
+      title: "Minecraft Movie",
+      videoUrl: "movies mp4/minecraft.mp4",
+      thumbnail: "https://upload.wikimedia.org/wikipedia/en/5/51/Minecraft_cover.png",
+      embed: false
+    },
+    {
+      title: "Coco",
+      videoUrl: "https://archive.org/embed/Coco.2017.STNAr.720p.BluRay.x264YTS.AG",
+      thumbnail: "https://upload.wikimedia.org/wikipedia/en/9/98/Coco_poster.png",
+      embed: true
     }
   ];
 
@@ -145,6 +153,7 @@
   const player = document.getElementById("player");
   const videoSource = document.getElementById("videoSource");
   const playerBox = document.getElementById("video-player");
+  const iframePlayer = document.getElementById("iframePlayer");
 
   function toggleCaptionMenu() {
     const menu = document.getElementById("captionMenu");
@@ -176,12 +185,21 @@
       <div class="movie-title">${movie.title}</div>
     `;
     card.onclick = () => {
-      videoSource.src = movie.videoUrl;
-      player.load();
+      if (movie.embed) {
+        player.style.display = "none";
+        iframePlayer.style.display = "block";
+        iframePlayer.src = movie.videoUrl;
+        document.getElementById("captionMenu").style.display = "none";
+      } else {
+        iframePlayer.style.display = "none";
+        player.style.display = "block";
+        videoSource.src = movie.videoUrl;
+        player.load();
+        player.play();
+        changeSubtitle(movie.subtitle);
+      }
       playerBox.style.display = "block";
-      player.scrollIntoView({ behavior: "smooth" });
-      player.play();
-      changeSubtitle(movie.subtitle);
+      playerBox.scrollIntoView({ behavior: "smooth" });
     };
     grid.appendChild(card);
   });
